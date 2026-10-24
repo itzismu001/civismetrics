@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { useCad } from '../context/CadContext.jsx';
 
 const unitToMeter = { 'm': 1, 'ft': 0.3048, 'in': 0.0254, 'cm': 0.01, 'mm': 0.001 };
 
@@ -17,6 +18,7 @@ const brickTypes = [
 ];
 
 export default function BricksCalculator() {
+  const { addToCad } = useCad();
   // --- Core Inputs ---
   const [unitSystem, setUnitSystem] = useState('ft'); 
   const [inputs, setInputs] = useState({
@@ -427,13 +429,10 @@ export default function BricksCalculator() {
   };
 
   return (
-    <div className="flex flex-col xl:flex-row gap-6 p-4 md:p-6 bg-[#020617] text-slate-100 min-h-screen relative overflow-hidden font-sans print:p-0 print:bg-white print:text-black print:overflow-visible print:min-h-0 print:block">
+    <div className="flex flex-col xl:flex-row gap-6 w-full h-full pb-6 text-slate-100 font-sans print:p-0 print:bg-white print:text-black print:overflow-visible print:min-h-0 print:block">
       
-      <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-cyan-600/20 blur-[120px] rounded-full pointer-events-none print:hidden"></div>
-      <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-orange-600/10 blur-[150px] rounded-full pointer-events-none print:hidden"></div>
-
       {/* --- Left Panel: Settings --- */}
-      <div className="w-full xl:w-[380px] bg-slate-900/60 backdrop-blur-xl p-5 rounded-3xl shadow-2xl border border-slate-700/50 flex flex-col gap-4 z-10 relative h-auto xl:h-[88vh] overflow-hidden shrink-0 print:hidden">
+      <div className="w-full xl:w-[380px] bg-slate-900/60 backdrop-blur-xl p-5 rounded-3xl shadow-2xl border border-slate-700/50 flex flex-col gap-4 z-10 relative h-auto xl:h-[calc(100vh-140px)] overflow-hidden shrink-0 print:hidden">
         
         <div className="flex items-center justify-between pb-3 border-b border-slate-700/50 shrink-0">
             <div className="flex items-center gap-3">
@@ -586,7 +585,7 @@ export default function BricksCalculator() {
       </div>
 
       {/* --- Right Panel: Viewer & Report --- */}
-      <div className="w-full xl:w-[calc(100%-404px)] bg-slate-900/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 flex flex-col overflow-hidden relative z-10 xl:h-[88vh] print:w-full print:h-auto print:border-none print:shadow-none print:bg-transparent print:overflow-visible print:block">
+      <div className="w-full xl:w-[calc(100%-404px)] bg-slate-900/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 flex flex-col overflow-hidden relative z-10 xl:h-[calc(100vh-140px)] print:w-full print:h-auto print:border-none print:shadow-none print:bg-transparent print:overflow-visible print:block">
         
         {/* Unified Top Toolbar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-md z-30 shrink-0 print:hidden">
@@ -617,6 +616,21 @@ export default function BricksCalculator() {
 
             {/* Right Side: Actions & Toggles */}
             <div className="flex items-center gap-3 shrink-0">
+                {results && (
+                    <button
+                      onClick={() => addToCad({
+                        type: 'wall_rectangle',
+                        source: 'Bricks Calculator',
+                        label: `Brick Wall (${(inputs.wallL * (unitToMeter[unitSystem] || 1)).toFixed(1)}m × ${(inputs.wallH * (unitToMeter[unitSystem] || 1)).toFixed(1)}m)`,
+                        length: inputs.wallL * (unitToMeter[unitSystem] || 1),
+                        width: 4.0,
+                        thickness: (inputs.wallT * (unitToMeter[unitSystem] || 1)) || 0.23
+                      })}
+                      className="px-3 py-2 bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-slate-950 border border-sky-500/30 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5"
+                    >
+                      📐 Add to CAD
+                    </button>
+                )}
                 {(mode === 'civil' || mode === 'math') && (
                     <button onClick={handlePrint} className="bg-emerald-500/10 hover:bg-emerald-500 border border-emerald-500/50 hover:border-emerald-500 text-emerald-400 hover:text-slate-900 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(16,185,129,0.1)] hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] flex items-center gap-2">
                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>

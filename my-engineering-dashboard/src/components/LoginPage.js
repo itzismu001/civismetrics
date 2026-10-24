@@ -72,7 +72,7 @@ const AnimatedCrane = () => (
   </div>
 );
 
-export default function LoginPage() {
+export default function LoginPage({ onLogin }) {
   const [role, setRole] = useState('engineer'); // 'engineer' | 'user'
   const [isLoading, setIsLoading] = useState(false);
 
@@ -84,8 +84,10 @@ export default function LoginPage() {
   const handleLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => setIsLoading(false), 2000);
+    setTimeout(() => {
+      setIsLoading(false);
+      if (onLogin) onLogin(role);
+    }, 600);
   };
 
   return (
